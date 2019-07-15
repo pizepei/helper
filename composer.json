@@ -1,0 +1,21 @@
+{
+    "name": "pizepei/helper",
+    "description": "helper",
+    "keywords": ["helper","helper一个通用的助手类库"],
+    "homepage": "https://org.heil.top/",
+    "authors": [
+        {
+            "name": "pizepei",
+            "email": "pizepei@pizepei.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "pizepei\\helper\\": "src/"
+        }
+    }
+}
