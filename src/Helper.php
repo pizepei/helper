@@ -83,8 +83,9 @@ class Helper implements  HelperInterface
     /***********************************函数方法*****************************************************/
 
     /**
-     *生成uuid方法
-     * @param bool $strtoupper 是否大小写
+     *
+     * @title  生成uuid方法
+     * @param bool $strtoupper 是否大小写 true为大写
      * @param int  $separator 分隔符  45 -       0 空字符串
      * @param bool $parameter true 是否使用空间配置分布式时不同机器上使用不同的值
      * @return string
@@ -102,5 +103,39 @@ class Helper implements  HelperInterface
         return $uuid;
     }
 
+    /**
+     * @Author 皮泽培
+     * @Created 2019/7/17 16:10
+     * @param $data
+     * @param string $name
+     * @title  判断是否为空
+     * @explain 如果为int 0  string 0 array [] 都会返回 true
+     * @return bool
+     * @throws \Exception
+     */
+    public function is_empty($data,$name='')
+    {
+        if ($name == ''){
+            if (empty($data) || $data === 0 || $data === '0' || $data === '' || $data===[]){
+                return true;
+            }
+        }else if (is_array($data) && $name !== ''){
+            /**
+             * 判断是否存在
+             */
+            if (isset($data[$name])){
+
+                if (empty($data[$name]) || $data[$name] === 0 || $data[$name] === '0' || $data[$name] === ''|| $data[$name] === []){
+                    return true;
+                }
+
+            }else{
+                return true;
+            }
+        }else{
+            throw new \Exception('参数错误');
+        }
+        return false;
+    }
 
 }
