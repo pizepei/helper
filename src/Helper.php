@@ -124,11 +124,9 @@ class Helper implements  HelperInterface
              * 判断是否存在
              */
             if (isset($data[$name])){
-
                 if (empty($data[$name]) || $data[$name] === 0 || $data[$name] === '0' || $data[$name] === ''|| $data[$name] === []){
                     return true;
                 }
-
             }else{
                 return true;
             }
@@ -138,4 +136,56 @@ class Helper implements  HelperInterface
         return false;
     }
 
+    /**
+     * @title http请求方法
+     * @param $url 请求地址（get参数拼接上）
+     * @param array $data 请求的主体数据
+     * @param array $parameter 参数 ssl[1、2]默认2验证https ssl       type [get、put、post、delete] 默认get，有$data自动设置为post        timeout  超时单位秒
+     * @return array info 请求信息  result 获取的请求body  error 错误数据
+     */
+    public function httpRequest($url,array $data=[],array $parameter=[])
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $parameter['ssl']??2);//是否忽略证书 默认不忽略
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST,$parameter['ssl']??2);//是否忽略证书 默认不忽略
+        #如果在部署过程中代码在此处验证失败，请到 http://curl.haxx.se/ca/cacert.pem 下载新的证书判别文件
+        #curl_setopt($curl,CURLOPT_CAINFO,dirname(__FILE__).'/cacert.pem');//这是根据http://curl.haxx.se/ca/cacert.pem 下载的证书，添加这句话之后就运行正常了
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $parameter['redirect']??false); // 使用自动跳转 默认否
+        /**
+         * 设置超时
+         */
+        curl_setopt($curl, CURLOPT_TIMEOUT, $parameter['timeout']??30);//单位 秒，也可以使用
+        #curl_setopt($ch, CURLOPT_NOSIGNAL, 1);     //注意，毫秒超时一定要设置这个
+        #curl_setopt($ch, CURLOPT_TIMEOUT_MS, 200); //超时毫秒，cURL 7.16.2中被加入。从PHP 5.2.3起可使用
+        /**
+         * 请求类型
+         */
+        if (isset($parameter['type'])){
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $parameter['type']); //定义请求类型
+            if (!empty($data)){
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            }
+        }else if (!empty($data)) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        }
+        /**
+         * 判断是否需要设置header
+         */
+        if (isset($parameter['header'])){
+            //定义header
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $parameter['header']);
+        }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        $output = curl_exec($curl);
+        $getinfo = curl_getinfo($curl); //获取请求信息
+        $error = curl_error($curl);
+        curl_close($curl);
+        return [
+            'info'  =>  $getinfo,
+            'result'=>  $output,
+            'error' =>  $error,
+        ];
+    }
 }
