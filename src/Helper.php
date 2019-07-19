@@ -10,8 +10,18 @@ declare(strict_types=1);
 
 namespace pizepei\helper;
 
+use Closure;
 use mysql_xdevapi\CrudOperationBindable;
 
+/**
+ * Class Helper
+ * @package pizepei\helper
+ * @property Helper           $helper
+ * @property Str              $str
+ * @property arrayList        $array
+ * @method static File file(bool $new = false) 文件类
+ * @method static File google(string $question) 向谷歌提问，返回答案内容
+ */
 class Helper implements  HelperInterface
 {
     /**
@@ -29,12 +39,94 @@ class Helper implements  HelperInterface
      * @var null
      */
     protected static $Str = null;
+    /**
+     * 容器绑定标识(父)
+     * @var array
+     */
+    private $parentBind = [
+        'file'                     => File::class,
+        'str'                      => Str::class,
+        'helper'                   => Helper::class,
+        'arrayList'                => ArrayList::class,
+    ];
+    /**
+     * 容器绑定标识(子)
+     * @var array
+     */
+    protected $childBind = [
+    ];
+    /**
+     * 容器(父)
+     * @var array
+     */
+    private $parentContainer = [
+
+    ];
+    /**
+     * 容器(子)
+     * @var array
+     */
+    private $childContainer = [
+
+    ];
 
     /**
      * 数组类
      * @var null
      */
     protected static $arrayList = null;
+
+    //在类外调用一个不存在的普通方法时，调用此方法
+    public function __call($name,$value) { //参数为：类外调用的方法名称以及调用此方法时传递的参数
+        echo $name."这个普通方法不存在，你调用这个不存在方法传递的值为".'<br/>';
+        var_dump($value).'<br/>';
+    }
+    public static function __callStatic($name,$arguments)
+    {
+        #parent
+        static::init();
+        if (isset(self::$Helper->parentBind[$name])){
+            # 容器中有服务
+            if (!isset(self::$Helper->parentContainer[$name])){
+                self::$Helper->parentContainer[$name] = new  self::$Helper->parentBind[$name];
+            }
+            return self::$Helper->parentContainer[$name];
+        }else if (isset(self::$Helper->childBind[$name])) {
+            # 容器中有服务
+            if (!isset(self::$Helper->childContainer[$name])){
+                self::$Helper->childContainer[$name] = new  self::$Helper->childBind[$name];
+            }
+            return self::$Helper->childContainer[$name];
+        }
+        throw new \Exception('The container does not exist');
+    }
+
+
+
+
+    public function __get($name)
+    {
+        #parent
+        if (isset(self::$Helper->parentBind[$name])){
+            # 容器中有服务
+            if (!isset(self::$Helper->parentContainer[$name])){
+                self::$Helper->parentContainer[$name] = new  self::$Helper->parentBind[$name];
+            }
+            return self::$Helper->parentContainer[$name];
+        }else if (isset(self::$Helper->childBind[$name])) {
+            # 容器中有服务
+            if (!isset(self::$Helper->childContainer[$name])){
+                self::$Helper->childContainer[$name] = new  self::$Helper->childBind[$name];
+            }
+            return self::$Helper->childContainer[$name];
+        }
+        throw new \Exception('The container does not exist');
+    }
+
+    public function exists($name,$type='parent')
+    {
+
+    }
 
     /**
      * @Author 皮泽培
@@ -51,7 +143,7 @@ class Helper implements  HelperInterface
          * 实现本身这个类
          */
         if (!self::$Helper || $new){
-            self::$Helper = new static();
+            self::$Helper = new self();
         }
         return self::$Helper;
     }
@@ -64,13 +156,13 @@ class Helper implements  HelperInterface
      * @return File|null
      * @throws \Exception
      */
-    public static function file(bool $new = false):File
-    {
-        if (!self::$File || $new){
-            self::$File = new File();
-        }
-        return self::$File;
-    }
+//    public static function file(bool $new = false):File
+//    {
+//        if (!self::$File || $new){
+//            self::$File = new File();
+//        }
+//        return self::$File;
+//    }
     /**
      * @Author 皮泽培
      * @Created 2019/7/17 15:07
