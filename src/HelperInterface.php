@@ -6,7 +6,7 @@
  * Time: 16:24
  * @title Helper基础接口类
  */
-
+declare(strict_types=1);
 
 namespace pizepei\helper;
 
@@ -18,7 +18,7 @@ interface HelperInterface
      */
     const object = null;
 
-    public static function init($new = false);
+    public static function init(bool $new = false);
 
 
 }

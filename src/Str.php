@@ -6,6 +6,7 @@
  * Time: 16:24
  * @title Helper字符串来
  */
+declare(strict_types=1);
 namespace pizepei\helper;
 
 
@@ -13,9 +14,9 @@ class Str
 {
     /**
      * 判断大小写
-     * @param $str
+     * @param $str 需要判断的字符串
      */
-    public function checkcase($str)
+    public function checkcase(string $str):bool
     {
         if (preg_match('/^[a-z]+$/', $str)) {
             //echo '小写字母';
@@ -28,10 +29,10 @@ class Str
 
     /**
      * 获取随机数字 数字
-     * @param $length
-     * @param $crypto_strong
+     * @param $length 长度
+     * @param $one 干扰
      */
-    public  function int_rand($length,$one='')
+    public  function int_rand(int $length,string $one=''):int
     {
         $str = $this->random_pseudo_bytes(32,10,$one);
         $strlen = strlen($str)-1;
@@ -39,16 +40,15 @@ class Str
         for($i=1;$i<=$length;$i++){
             $results  .= $str{mt_rand(0,$strlen)};
         }
-
-
-        return $results;
+        return (int)$results;
     }
     /**
      * 获取随机字符串
-     * @param $length
+     * @param $length 长度
+     * @param $one 干扰
      * @throws \Exception
      */
-    public  function str_rand($length,$one='')
+    public  function str_rand(int $length,string $one=''):string
     {
         $str = $this->random_pseudo_bytes(32,16,$one);
         $strlen = strlen($str)-1;
@@ -67,7 +67,7 @@ class Str
      * @return string
      * @throws \Exception
      */
-    public  function random_pseudo_bytes($length=32,$tobase=16,$one='')
+    public  function random_pseudo_bytes($length=32,$tobase=16,string $one='')
     {
         if(function_exists('openssl_random_pseudo_bytes')){
             $str = openssl_random_pseudo_bytes($length,$crypto_strong);

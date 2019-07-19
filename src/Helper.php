@@ -6,8 +6,11 @@
  * Time: 16:24
  * @title Helper基础类
  */
+declare(strict_types=1);
 
 namespace pizepei\helper;
+
+use mysql_xdevapi\CrudOperationBindable;
 
 class Helper implements  HelperInterface
 {
@@ -26,6 +29,13 @@ class Helper implements  HelperInterface
      * @var null
      */
     protected static $Str = null;
+
+    /**
+     * 数组类
+     * @var null
+     */
+    protected static $arrayList = null;
+
     /**
      * @Author 皮泽培
      * @Created 2019/7/17 15:07
@@ -35,7 +45,7 @@ class Helper implements  HelperInterface
      * @return Helper
      * @throws \Exception
      */
-    public static function init($new = false)
+    public static function init(bool $new = false):self
     {
         /**
          * 实现本身这个类
@@ -54,7 +64,7 @@ class Helper implements  HelperInterface
      * @return File|null
      * @throws \Exception
      */
-    public static function file($new = false)
+    public static function file(bool $new = false):File
     {
         if (!self::$File || $new){
             self::$File = new File();
@@ -70,7 +80,7 @@ class Helper implements  HelperInterface
      * @return Str|null
      * @throws \Exception
      */
-    public static function str($new = false)
+    public static function str(bool$new = false):Str
     {
         if (!self::$Str || $new){
             self::$Str = new Str();
@@ -78,7 +88,22 @@ class Helper implements  HelperInterface
         return self::$Str;
     }
 
-
+    /**
+     * @Author 皮泽培
+     * @Created 2019/7/19 15:07
+     * @param bool $new
+     * @title  文件函数
+     * @explain 文件类函数
+     * @return ArrayList|null
+     * @throws \Exception
+     */
+    public static function arrayList(bool$new = false):ArrayList
+    {
+        if (!self::$arrayList || $new){
+            self::$arrayList = new ArrayList();
+        }
+        return self::$arrayList;
+    }
 
     /***********************************函数方法*****************************************************/
 
@@ -90,9 +115,9 @@ class Helper implements  HelperInterface
      * @param bool $parameter true 是否使用空间配置分布式时不同机器上使用不同的值
      * @return string
      */
-    public  function getUuid($strtoupper=false,$separator=45,$parameter=false)
+    public  function getUuid(bool $strtoupper=false,int $separator=45,string $parameter=''):string
     {
-        $charid = md5(($parameter?$parameter:mt_rand(10000,99999)).uniqid(mt_rand(), true));
+        $charid = md5(($parameter==''?$parameter:mt_rand(10000,99999)).uniqid((string)mt_rand(), true));
         if($strtoupper){$charid = strtoupper($charid);}
         $hyphen = chr($separator);// "-"
         $uuid = substr($charid, 0, 8).$hyphen
@@ -113,7 +138,7 @@ class Helper implements  HelperInterface
      * @return bool
      * @throws \Exception
      */
-    public function is_empty($data,$name='')
+    public function is_empty($data,string $name=''):bool
     {
         if ($name == ''){
             if (empty($data) || $data === 0 || $data === '0' || $data === '' || $data===[]){
@@ -141,9 +166,9 @@ class Helper implements  HelperInterface
      * @param $url 请求地址（get参数拼接上）
      * @param array $data 请求的主体数据
      * @param array $parameter 参数 ssl[1、2]默认2验证https ssl       type [get、put、post、delete] 默认get，有$data自动设置为post        timeout  超时单位秒
-     * @return array info 请求信息  result 获取的请求body  error 错误数据
+     * @return array info 请求信息  body 获取的请求body  error 错误数据   header  响应方的响应header
      */
-    public function httpRequest($url,array $data=[],array $parameter=[])
+    public function httpRequest(string $url,array $data=[],array $parameter=[]):array
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -177,15 +202,94 @@ class Helper implements  HelperInterface
             //定义header
             curl_setopt($curl, CURLOPT_HTTPHEADER, $parameter['header']);
         }
+        /**
+         * 设置COOKIE
+         */
+        if (isset($parameter['cookie'])){
+            foreach ($parameter['cookie'] as $value){
+                curl_setopt($curl, CURLOPT_COOKIE, $value);
+            }
+        }
+        curl_setopt($curl, CURLOPT_HEADER, 1);//获取头部信息
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
         $output = curl_exec($curl);
         $getinfo = curl_getinfo($curl); //获取请求信息
         $error = curl_error($curl);
+        /**
+         * 分类$output 获取获取头部信息和主体信息
+         */
+        list($header, $body) = explode("\r\n\r\n", $output);
+        $header = explode("\n", $header);
         curl_close($curl);
         return [
-            'info'  =>  $getinfo,
-            'result'=>  $output,
-            'error' =>  $error,
+            'RequestInfo'  =>  $getinfo??[],//请求详情
+            'body' =>$body??'',//响应主体
+            'header'=>$header??[],//响应方的响应header
+            'error' =>  $error??'',//curl请求错误
+            'result'=>  $output??'',//全部结果
         ];
+//        json_decode()
+
+    }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/7/19 14:17
+     * @param string $json
+     * @param bool $assoc
+     * @param int $depth
+     * @param int $options
+     * @title  json解码 默认不处理大int数据，自动处理可能的失败问题
+     * @explain json解码 默认不处理大int数据，自动处理可能的失败问题
+     * @return array
+     * @throws \Exception
+     */
+    public function json_decode(string $json,$assoc = true,int $depth=512,$options = JSON_BIGINT_AS_STRING):array
+    {
+        # 正常解析
+        $data = json_decode($json,$assoc,$depth,$options);
+        if ($data){
+            # json字符串必须是utf8编码
+            $encode = mb_detect_encoding($json, array("ASCII",'UTF-8',"GB2312","GBK",'BIG5'));
+            if ($encode !== 'UTF-8'){
+                $json = mb_convert_encoding($json, 'UTF-8', $encode);
+                $data = json_decode($json,$assoc,$depth,$options);
+            }
+        }
+        /**
+         * 正常解析失败  编码解析失败
+         */
+        if (!$data){
+            #清除bom头
+            $jsonUrl = urlencode($json);
+            $data = json_decode(urldecode(trim($jsonUrl, "\xEF\xBB\xBF")),$assoc,$depth,$options);
+        }
+        #清除bom头失败
+        if (!$data){
+            #替换' 为"
+            $data = json_decode(str_replace("'", '"', $json),$assoc,$depth,$options);
+        }
+        #替换'失败
+        if (!$data){
+            #不能有多余的逗号 如：[1,2,]
+            $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
+            $data = json_decode(str_replace("'", '"', $json),$assoc,$depth,$options);
+        }
+        #可能是开启get_magic_quotes_gpc  这里就不做处理
+        return $data?$data:[];
+    }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/7/19 14:19
+     * @param array $array
+     * @title  array转json字符串 默认不编码中文
+     * @explain array转json字符串 默认不编码中文
+     * @return string
+     * @throws \Exception
+     */
+    public function json_encode(array $array):string
+    {
+        return json_encode($array,JSON_UNESCAPED_UNICODE);
     }
 }

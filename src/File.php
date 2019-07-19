@@ -6,6 +6,7 @@
  * Time: 16:24
  * @title Helper文件类
  */
+declare(strict_types=1);
 
 namespace pizepei\helper;
 
@@ -20,7 +21,7 @@ class File
      * @param int $mode
      * @return bool
      */
-    public  function createDir($dir, $mode = 0777)
+    public  function createDir(string $dir, int $mode = 0777):bool
     {
         if (is_dir($dir) || @mkdir($dir, $mode,true)) return TRUE;
         if (!$this->createDir(dirname($dir), $mode)) return FALSE;
@@ -67,7 +68,7 @@ class File
      * @title  删除文件夹以及文件夹下的所有文件
      * @explain 清空文件夹函数和清空文件夹后删除空文件夹函数的处理
      */
-    public function deldir($path)
+    public function deldir(string $path)
     {
         //如果是目录则继续
         if(is_dir($path)){
