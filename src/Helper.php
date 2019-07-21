@@ -241,7 +241,7 @@ class Helper implements  HelperInterface
              * 判断是否存在
              */
             if (isset($data[$name])){
-                if (empty($data[$name]) || $data[$name] === 0 || $data[$name] === '0' || $data[$name] === ''|| $data[$name] === []){
+                if (empty($data[$name]) || $data[$name] === 0 || $data[$name] === '0' || $data[$name] === '' || $data[$name] === []){
                     return true;
                 }
             }else{
@@ -256,11 +256,11 @@ class Helper implements  HelperInterface
     /**
      * @title http请求方法
      * @param $url 请求地址（get参数拼接上）
-     * @param array $data 请求的主体数据
+     * @param dtring $data 请求的主体数据
      * @param array $parameter 参数 ssl[1、2]默认2验证https ssl       type [get、put、post、delete] 默认get，有$data自动设置为post        timeout  超时单位秒
      * @return array info 请求信息  body 获取的请求body  error 错误数据   header  响应方的响应header
      */
-    public function httpRequest(string $url,array $data=[],array $parameter=[]):array
+    public function httpRequest(string $url,string $data='',array $parameter=[]):array
     {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
