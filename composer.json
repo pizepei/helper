@@ -11,6 +11,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "pizepei/container": "dev-master",
         "php": ">=7.0.0"
     },
     "autoload": {
