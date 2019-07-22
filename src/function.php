@@ -4,6 +4,18 @@
  */
 declare (strict_types = 1);
 use \pizepei\helper\Helper;
+use \pizepei\staging\App;
+
+if (!function_exists('app')) {
+    /**
+     * 快速获取容器中的实例 支持依赖注入
+     * @return  \pizepei\staging\App
+     */
+    function app():App
+    {
+        return\pizepei\staging\App::init();
+    }
+}
 
 if (!function_exists('Helper')) {
     /**
@@ -16,7 +28,7 @@ if (!function_exists('Helper')) {
         return Helper::init($new);
     }
 }
-if (!function_exists('Helper')) {
+if (!function_exists('HelperClass')) {
     /**
      * 快速获取容器中的实例 支持依赖注入
      * @param bool $new  是否强制实例化

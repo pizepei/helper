@@ -10,8 +10,10 @@ declare(strict_types=1);
 
 namespace pizepei\helper;
 
+use app\HelperClass;
 use Closure;
 use mysql_xdevapi\CrudOperationBindable;
+use pizepei\staging\App;
 
 /**
  * Class Helper
@@ -132,20 +134,34 @@ class Helper implements  HelperInterface
      * @Author 皮泽培
      * @Created 2019/7/17 15:07
      * @param bool $new
+     * @param App $app
      * @title  常用系统函数
      * @explain 常用系统函数
      * @return Helper
      * @throws \Exception
      */
-    public static function init(bool $new = false):self
+    public static function init(bool $new = false,$app=null):self
     {
         /**
          * 实现本身这个类
          */
         if (!self::$Helper || $new){
-            self::$Helper = new self();
+            self::$Helper = new self($app);
         }
         return self::$Helper;
+    }
+    public function __construct(App $app)
+    {
+        if ($app){
+            # 判断是否存在
+            $HelperClass = '\\'.$app->__APP__.'\HelperClass';
+            if($HelperClass::childBind !== [])
+            {
+                #合并
+                $this->childBind = array_merge($HelperClass::childBind ,$this->childBind);
+            }
+        }
+        self::$Helper = $this;
     }
     /**
      * @Author 皮泽培
