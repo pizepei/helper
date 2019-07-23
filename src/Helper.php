@@ -21,8 +21,9 @@ use pizepei\staging\App;
  * @property Helper           $helper
  * @property Str              $str
  * @property arrayList        $array
- * @method static File file(bool $new = false) 文件类
- * @method static File google(string $question) 向谷歌提问，返回答案内容
+ * @method static File file(bool $new = false):File 文件类
+ * @method static ArrayList arrayList(bool$new = false):ArrayList  数组类
+ * @method static Str str(bool$new = false):Str 字符串类
  */
 class Helper implements  HelperInterface
 {
@@ -71,7 +72,6 @@ class Helper implements  HelperInterface
     private $childContainer = [
 
     ];
-
     /**
      * 数组类
      * @var null
@@ -80,8 +80,7 @@ class Helper implements  HelperInterface
 
     //在类外调用一个不存在的普通方法时，调用此方法
     public function __call($name,$value) { //参数为：类外调用的方法名称以及调用此方法时传递的参数
-        echo $name."这个普通方法不存在，你调用这个不存在方法传递的值为".'<br/>';
-        var_dump($value).'<br/>';
+
     }
     public static function __callStatic($name,$arguments)
     {
@@ -103,10 +102,13 @@ class Helper implements  HelperInterface
         throw new \Exception('The container does not exist');
     }
 
-
-
-
-    public function __get($name)
+    /**
+     * @Author 皮泽培
+     * @Created 2019/7/23 11:22
+     * @param $name
+     * @return object
+     */
+    public function __get($name):object
     {
         #parent
         if (isset(self::$Helper->parentBind[$name])){
@@ -163,54 +165,66 @@ class Helper implements  HelperInterface
         }
         self::$Helper = $this;
     }
-    /**
-     * @Author 皮泽培
-     * @Created 2019/7/17 15:07
-     * @param bool $new
-     * @title  文件函数
-     * @explain 文件类函数
-     * @return File|null
-     * @throws \Exception
-     */
-//    public static function file(bool $new = false):File
-//    {
-//        if (!self::$File || $new){
-//            self::$File = new File();
-//        }
-//        return self::$File;
-//    }
-    /**
-     * @Author 皮泽培
-     * @Created 2019/7/17 15:07
-     * @param bool $new
-     * @title  文件函数
-     * @explain 文件类函数
-     * @return Str|null
-     * @throws \Exception
-     */
-    public static function str(bool$new = false):Str
-    {
-        if (!self::$Str || $new){
-            self::$Str = new Str();
-        }
-        return self::$Str;
-    }
 
     /**
      * @Author 皮泽培
-     * @Created 2019/7/19 15:07
-     * @param bool $new
-     * @title  文件函数
-     * @explain 文件类函数
-     * @return ArrayList|null
-     * @throws \Exception
+     * @Created 2019/7/23 11:49
+     * @param \Redis $redis
+     * @param array $name  Lock名请自己分类管理 ['name','name',...]不超过10个
+     * @param bool $operation 默认20 设置Lock  10 解除Lock
+     * @param int $usleep 默认300毫秒(三分之三秒)     1秒 = 1000毫秒
+     * @param int $ttl 默认有效期问120s 超过ttl自动解除Lock 为了系统稳定不可设置0 超过600
+     * @title  syncLock 同步Lock
+     * @explain Lock默认有效期问120s 超过ttl自动解除Lock  特别注意一般情况设置Lock放在读取缓存前（判断操作前）解除Lock在获取结果后
+     * @return bool|int|string
      */
-    public static function arrayList(bool$new = false):ArrayList
+    public  function syncLock(\Redis $redis,array $name,bool $operation=true,int $usleep=300,$ttl = 120)
     {
-        if (!self::$arrayList || $new){
-            self::$arrayList = new ArrayList();
+        # 本方法解决的问题：
+        # 同步lock 如 在需要请求第三方接口获取一个token缓存到本地30分钟时
+        # 当本地缓存的token过期时同时有4个请求触发的业务逻辑都需要使用token时
+        #   正常情况下在在第一个请求第三方接口获取到token并缓存到本地前的所有请求都会触发去请求第三方接口导致重复获取第三方token
+        #       假如有4个请求触发了，那么就有概率出现最后一个请求的响应以及获取到并且缓存成功，然后第三个请求结果成响应然后再次缓存导致本地缓存token为无效token
+        # 同时请不要忽略http请求的时间差
+
+        # 在本地本地缓存是否存在前 使用syncLock($redis,$name,true)
+        #   会判断当前syncLock是否锁
+        #       如果是就按照配置usleep()
+        #       如果不是就设置Lock锁并且不休眠马上return 进行业务逻辑获取信息并且缓存（这个操作后的其他请求会按照配置usleep()）
+        # 在获取到对应内并且缓存成功后 使用syncLock($redis,$name,false)
+
+        if ($ttl == 0){throw new \Exception('TTL cannot be 0');}
+        if ($ttl >= 600){throw new \Exception('TTL cannot be greater than 600');}
+        if ($usleep === 0){throw new \Exception('Usleep cannot be 0');}
+        if (count($name) < 2){throw new \Exception('Name must be at least two');};
+        if (count($name) > 10){throw new \Exception(' Names cannot exceed 10');}
+
+        $name = implode(':',$name);
+        # 判断是 解除Lock  还是设置Lock
+        if ($operation){
+            $microtime = microtime(true);
+            $time = $microtime+$ttl+($usleep*1000)+0.2;
+            # 先读取是否有缓存
+            $syncLock = $redis->get('helper:syncLock:'.$name);
+            if ($syncLock == null || $syncLock==false){
+                return $redis->setex('helper:syncLock:'.$name,$ttl,20);# 没有Lock通过  可以执行下面的业务逻辑
+            }
+            if ($syncLock == 20){
+                $usleep = $usleep*1000;
+                for ($i=1;(time()-$time)<=0;$i++){
+                    usleep($usleep);//缓解系统压力进行休眠
+                    $syncLock = $redis->get('helper:syncLock:'.$name);
+                    if ($syncLock == null || $syncLock==false){
+                        return  ['startTime'=>$microtime,'theTime'=>microtime(true),'i'=>$i];# 没有Lock通过
+                    }
+                }
+                # 意外情况
+                return false;
+            }
+        }else{
+            # 解锁
+            return $redis->del('helper:syncLock:'.$name);
         }
-        return self::$arrayList;
     }
 
     /***********************************函数方法*****************************************************/
@@ -336,8 +350,6 @@ class Helper implements  HelperInterface
             'error' =>  $error??'',//curl请求错误
             'result'=>  $output??'',//全部结果
         ];
-//        json_decode()
-
     }
 
     /**
