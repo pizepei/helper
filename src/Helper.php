@@ -171,7 +171,7 @@ class Helper implements  HelperInterface
      * @Created 2019/7/23 11:49
      * @param \Redis $redis
      * @param array $name  Lock名请自己分类管理 ['name','name',...]不超过10个
-     * @param bool $operation 默认20 设置Lock  10 解除Lock
+     * @param bool $operation 默认设置Lock  false解除Lock
      * @param int $usleep 默认300毫秒(三分之三秒)     1秒 = 1000毫秒
      * @param int $ttl 默认有效期问120s 超过ttl自动解除Lock 为了系统稳定不可设置0 超过600
      * @title  syncLock 同步Lock
