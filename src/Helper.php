@@ -172,13 +172,14 @@ class Helper implements  HelperInterface
      * @param \Redis $redis
      * @param array $name  Lock名请自己分类管理 ['name','name',...]不超过10个
      * @param bool $operation 默认设置Lock  false解除Lock
+     * @param string $group 分组在设置Lock时设置，如果其他的任务出现异常可以使用分组删除分组下的所有Lock
      * @param int $usleep 默认300毫秒(三分之三秒)     1秒 = 1000毫秒
      * @param int $ttl 默认有效期问120s 超过ttl自动解除Lock 为了系统稳定不可设置0 超过600
      * @title  syncLock 同步Lock
      * @explain Lock默认有效期问120s 超过ttl自动解除Lock  特别注意一般情况设置Lock放在读取缓存前（判断操作前）解除Lock在获取结果后
      * @return bool|int|string
      */
-    public  function syncLock(\Redis $redis,array $name,bool $operation=true,int $usleep=300,$ttl = 120)
+    public  function syncLock(\Redis $redis,array $name,bool $operation=true,string $group='',int $usleep=300,$ttl = 10)
     {
         # 本方法解决的问题：
         # 同步lock 如 在需要请求第三方接口获取一个token缓存到本地30分钟时
@@ -192,12 +193,15 @@ class Helper implements  HelperInterface
         #       如果是就按照配置usleep()
         #       如果不是就设置Lock锁并且不休眠马上return 进行业务逻辑获取信息并且缓存（这个操作后的其他请求会按照配置usleep()）
         # 在获取到对应内并且缓存成功后 使用syncLock($redis,$name,false)
+        #
+        # 关于多个Lock 任务嵌套 其中一个任务出现异常 导致死Lock 时可以通过group解决
 
         if ($ttl == 0){throw new \Exception('TTL cannot be 0');}
         if ($ttl >= 600){throw new \Exception('TTL cannot be greater than 600');}
         if ($usleep === 0){throw new \Exception('Usleep cannot be 0');}
         if (count($name) < 2){throw new \Exception('Name must be at least two');};
         if (count($name) > 10){throw new \Exception(' Names cannot exceed 10');}
+        $group = $group==''?'':$group.':';
 
         $name = implode(':',$name);
         # 判断是 解除Lock  还是设置Lock
@@ -207,13 +211,13 @@ class Helper implements  HelperInterface
             # 先读取是否有缓存
             $syncLock = $redis->get('helper:syncLock:'.$name);
             if ($syncLock == null || $syncLock==false){
-                return $redis->setex('helper:syncLock:'.$name,$ttl,20);# 没有Lock通过  可以执行下面的业务逻辑
+                return $redis->setex('helper:syncLock:'.$group.$name,$ttl,20);# 没有Lock通过  可以执行下面的业务逻辑
             }
             if ($syncLock == 20){
                 $usleep = $usleep*1000;
                 for ($i=1;(time()-$time)<=0;$i++){
                     usleep($usleep);//缓解系统压力进行休眠
-                    $syncLock = $redis->get('helper:syncLock:'.$name);
+                    $syncLock = $redis->get('helper:syncLock:'.$group.$name);
                     if ($syncLock == null || $syncLock==false){
                         return  ['startTime'=>$microtime,'theTime'=>microtime(true),'i'=>$i];# 没有Lock通过
                     }
@@ -223,7 +227,14 @@ class Helper implements  HelperInterface
             }
         }else{
             # 解锁
-            return $redis->del('helper:syncLock:'.$name);
+            if ($group ==''){
+                return $redis->del('helper:syncLock:'.$group.$name);
+            }else{
+                $keys = $redis->keys('helper:syncLock:'.$group.'*');
+                if (!empty($keys)){return $redis->del($keys);
+                }
+            }
+
         }
     }
 
