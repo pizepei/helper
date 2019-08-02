@@ -331,10 +331,13 @@ class Helper implements  HelperInterface
         /**
          * 判断是否需要设置header
          */
+        $header = ['content-type: application/json'];
         if (isset($parameter['header'])){
+            $header = $parameter['header'];
             //定义header
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $parameter['header']);
         }
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+
         /**
          * 设置COOKIE
          */
@@ -422,5 +425,47 @@ class Helper implements  HelperInterface
     public function json_encode(array $array):string
     {
         return json_encode($array,JSON_UNESCAPED_UNICODE);
+    }
+
+
+    /**
+     * [get_ip 不同环境下获取真实的IP]
+     * @Effect
+     * @return [type] [description]
+     */
+    public static function get_ip($type = 'direct'){
+        /**
+         *direct 直连   cdn 官方cnd   代理 agency
+         */
+        if($type== 'direct'){
+            if(isset($_SERVER)){
+                $realip = $_SERVER['REMOTE_ADDR'];
+            }else{
+                $realip = getenv("REMOTE_ADDR");
+            }
+
+        }else if($type == 'cdn' || $type == 'agency'){
+
+            //判断服务器是否允许$_SERVER
+            if(isset($_SERVER)){
+                if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
+                    $realip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+                }elseif(isset($_SERVER['HTTP_CLIENT_IP'])) {
+                    $realip = $_SERVER['HTTP_CLIENT_IP'];
+                }else{
+                    $realip = $_SERVER['REMOTE_ADDR'];
+                }
+            }else{
+                //不允许就使用getenv获取
+                if(getenv("HTTP_X_FORWARDED_FOR")){
+                    $realip = getenv( "HTTP_X_FORWARDED_FOR");
+                }elseif(getenv("HTTP_CLIENT_IP")) {
+                    $realip = getenv("HTTP_CLIENT_IP");
+                }else{
+                    $realip = getenv("REMOTE_ADDR");
+                }
+            }
+        }
+        return $realip;
     }
 }
