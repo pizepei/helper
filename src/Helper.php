@@ -358,6 +358,7 @@ class Helper implements  HelperInterface
         $header = explode("\n", $header);
         curl_close($curl);
         return [
+            'code' =>$getinfo['http_code']??5000,
             'RequestInfo'  =>  $getinfo??[],//请求详情
             'body' =>$body??'',//响应主体
             'header'=>$header??[],//响应方的响应header
