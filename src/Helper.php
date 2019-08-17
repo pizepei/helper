@@ -434,7 +434,7 @@ class Helper implements  HelperInterface
      * @Effect
      * @return [type] [description]
      */
-    public static function get_ip($type = 'direct'){
+    public  function get_ip($type = 'direct'){
         /**
          *direct 直连   cdn 官方cnd   代理 agency
          */

@@ -67,7 +67,7 @@ class Str
      * @return string
      * @throws \Exception
      */
-    public  function random_pseudo_bytes($length=32,$tobase=16,string $one='')
+    public  function random_pseudo_bytes(int$length=32,int$tobase=16,string $one=''):string
     {
         if(function_exists('openssl_random_pseudo_bytes')){
             $str = openssl_random_pseudo_bytes($length,$crypto_strong);
