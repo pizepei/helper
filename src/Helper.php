@@ -361,7 +361,7 @@ class Helper implements  HelperInterface
             'code' =>$getinfo['http_code']??5000,
             'RequestInfo'  =>  $getinfo??[],//请求详情
             'body' =>$body??'',//响应主体
-            'header'=>$header??[],//响应方的响应header
+            'header'=>$header??[],//响应方的响应header 可使用方法分离 Helper::init()::arrayList()->array_explode_value($res['header'],': ',true);
             'error' =>  $error??'',//curl请求错误
             'result'=>  $output??'',//全部结果
         ];
