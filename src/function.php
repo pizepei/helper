@@ -5,15 +5,16 @@
 declare (strict_types = 1);
 use \pizepei\helper\Helper;
 use \pizepei\staging\App;
+use \container\app\AppContainer;
 
 if (!function_exists('app')) {
     /**
      * 快速获取容器中的实例 支持依赖注入
-     * @return  \pizepei\staging\App
+     * @return  container\app\AppContainer
      */
     function app():App
     {
-        return\pizepei\staging\App::init();
+        return \pizepei\staging\App::init();
     }
 }
 
