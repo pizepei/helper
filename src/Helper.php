@@ -13,157 +13,45 @@ namespace pizepei\helper;
 use app\HelperClass;
 use Closure;
 use mysql_xdevapi\CrudOperationBindable;
+use pizepei\container\Container;
 use pizepei\staging\App;
 
 /**
  * Class Helper
  * @package pizepei\helper
- * @property Helper           $helper
- * @property Str              $str
- * @property arrayList        $array
- * @method static File file(bool $new = false):File 文件类
- * @method static ArrayList arrayList(bool$new = false):ArrayList  数组类
- * @method static Str str(bool$new = false):Str 字符串类
+ * @method  File                file(bool $new = false):File 文件类
+ * @method  ArrayList           arrayList(bool$new = false):ArrayList  数组类
+ * @method  Str                 str(bool$new = false):Str 字符串类
  */
-class Helper implements  HelperInterface
+class Helper extends Container
 {
     /**
-     * 当前类
-     * @var null
+     * 容器名称
      */
-    protected static $Helper = null;
-    /**
-     * 文件类
-     * @var null
-     */
-    protected static $File = null;
-    /**
-     * 字符串类
-     * @var null
-     */
-    protected static $Str = null;
+    const CONTAINER_NAME = 'Helper';
     /**
      * 容器绑定标识(父)
      * @var array
      */
-    private $parentBind = [
+    protected $baseBind = [
         'file'                     => File::class,
         'str'                      => Str::class,
         'helper'                   => Helper::class,
         'arrayList'                => ArrayList::class,
     ];
-    /**
-     * 容器绑定标识(子)
-     * @var array
-     */
-    protected $childBind = [
-    ];
-    /**
-     * 容器(父)
-     * @var array
-     */
-    private $parentContainer = [
 
-    ];
-    /**
-     * 容器(子)
-     * @var array
-     */
-    private $childContainer = [
-
-    ];
-    /**
-     * 数组类
-     * @var null
-     */
-    protected static $arrayList = null;
-
-    //在类外调用一个不存在的普通方法时，调用此方法
-    public function __call($name,$value) { //参数为：类外调用的方法名称以及调用此方法时传递的参数
-
-    }
-    public static function __callStatic($name,$arguments)
+    public function __construct(string $son = '')
     {
-        #parent
-        static::init();
-        if (isset(self::$Helper->parentBind[$name])){
-            # 容器中有服务
-            if (!isset(self::$Helper->parentContainer[$name])){
-                self::$Helper->parentContainer[$name] = new  self::$Helper->parentBind[$name];
-            }
-            return self::$Helper->parentContainer[$name];
-        }else if (isset(self::$Helper->childBind[$name])) {
-            # 容器中有服务
-            if (!isset(self::$Helper->childContainer[$name])){
-                self::$Helper->childContainer[$name] = new  self::$Helper->childBind[$name];
-            }
-            return self::$Helper->childContainer[$name];
-        }
-        throw new \Exception('The container does not exist');
-    }
-
-    /**
-     * @Author 皮泽培
-     * @Created 2019/7/23 11:22
-     * @param $name
-     * @return object
-     */
-    public function __get($name):object
-    {
-        #parent
-        if (isset(self::$Helper->parentBind[$name])){
-            # 容器中有服务
-            if (!isset(self::$Helper->parentContainer[$name])){
-                self::$Helper->parentContainer[$name] = new  self::$Helper->parentBind[$name];
-            }
-            return self::$Helper->parentContainer[$name];
-        }else if (isset(self::$Helper->childBind[$name])) {
-            # 容器中有服务
-            if (!isset(self::$Helper->childContainer[$name])){
-                self::$Helper->childContainer[$name] = new  self::$Helper->childBind[$name];
-            }
-            return self::$Helper->childContainer[$name];
-        }
-        throw new \Exception('The container does not exist');
-    }
-
-    public function exists($name,$type='parent')
-    {
-
-    }
-
-    /**
-     * @Author 皮泽培
-     * @Created 2019/7/17 15:07
-     * @param bool $new
-     * @param App $app
-     * @title  常用系统函数
-     * @explain 常用系统函数
-     * @return Helper
-     * @throws \Exception
-     */
-    public static function init(bool $new = false,$app=null):self
-    {
-        /**
-         * 实现本身这个类
-         */
-        if (!self::$Helper || $new){
-            self::$Helper = new self($app);
-        }
-        return self::$Helper;
-    }
-    public function __construct(App $app)
-    {
-        if ($app){
+        if ($son !==''){
             # 判断是否存在
-            $HelperClass = '\\'.$app->__APP__.'\HelperClass';
-            if($HelperClass::childBind !== [])
+//            $HelperClass = '\\'.$app->__APP__.'\HelperClass';
+            if($son::bind !== [])
             {
                 #合并
-                $this->childBind = array_merge($HelperClass::childBind ,$this->childBind);
+                $this->bind = array_merge($son::bind ,$this->bind);
             }
         }
-        self::$Helper = $this;
+        self::$containerInstance[static::CONTAINER_NAME] = $this;
     }
 
     /**
@@ -484,4 +372,5 @@ class Helper implements  HelperInterface
         }
         return false;
     }
+
 }
