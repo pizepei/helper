@@ -22,6 +22,7 @@ use pizepei\staging\App;
  * @method  File                file(bool $new = false):File 文件类
  * @method  ArrayList           arrayList(bool$new = false):ArrayList  数组类
  * @method  Str                 str(bool$new = false):Str 字符串类
+ * @method  Date                Date(bool $new = false):Date 日期时间类
  */
 class Helper extends Container
 {
@@ -38,6 +39,7 @@ class Helper extends Container
         'str'                      => Str::class,
         'helper'                   => Helper::class,
         'arrayList'                => ArrayList::class,
+        'Date'                      =>Date::class,
     ];
 
     public function __construct(string $son = '')
