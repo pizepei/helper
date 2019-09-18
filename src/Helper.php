@@ -365,6 +365,10 @@ class Helper extends Container
      */
     public function is_https()
     {
+        //REQUEST_SCHEME
+        if (isset($_SERVER['REQUEST_SCHEME'])){
+            return $_SERVER['REQUEST_SCHEME']=='https'?true:false;
+        }
         if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
             return true;
         } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
