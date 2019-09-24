@@ -379,4 +379,16 @@ class Helper extends Container
         return false;
     }
 
+    /**
+     * @Author 皮泽培
+     * @Created 2019/9/24 17:37
+     * @return string
+     * @param string $msg  下载速度
+     * @title  js alert 效果
+     * @explain 路由功能说明
+     */
+    public function alert($msg)
+    {
+        echo "<script>alert('".$msg."');</script>";
+    }
 }
