@@ -391,4 +391,23 @@ class Helper extends Container
     {
         echo "<script>alert('".$msg."');</script>";
     }
+
+    /**
+     * Get QR-Code URL for image, from google charts.
+     * @title  通过谷歌API获取二维码url
+     * @param string $name
+     * @param string $secret
+     * @param string $title
+     * @param array  $params
+     * @return string
+     */
+    public function getQRCodeGoogleUrl(string $urlencoded, $level = 'M', int $width = 200,int $height=200):string
+    {
+        $level = !empty($params['level']) && array_search($params['level'], array('L', 'M', 'Q', 'H')) !== false ? $params['level'] : 'M';
+        $urlencoded = urlencode($urlencoded);
+        return 'https://chart.googleapis.com/chart?chs='.$width.'x'.$height.'&chld='.$level.'|0&cht=qr&chl='.$urlencoded.'';
+    }
+
+
+
 }
