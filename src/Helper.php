@@ -42,19 +42,6 @@ class Helper extends Container
         'Date'                      =>Date::class,
     ];
 
-    public function __construct(string $son = '')
-    {
-        if ($son !==''){
-            # 判断是否存在
-//            $HelperClass = '\\'.$app->__APP__.'\HelperClass';
-            if($son::bind !== [])
-            {
-                #合并
-                $this->bind = array_merge($son::bind ,$this->bind);
-            }
-        }
-        self::$containerInstance[static::CONTAINER_NAME] = $this;
-    }
 
     /**
      * @Author 皮泽培
