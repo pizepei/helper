@@ -17,6 +17,41 @@ if (!function_exists('app')) {
         return \pizepei\staging\App::init();
     }
 }
+if (!function_exists('succeed')) {
+    /**
+     * @Author pizepei
+     * @Created 2019/2/15 23:14
+     * @Author pizepei
+     * @Created 2019/2/15 23:02
+     * @param     $data
+     * @param     $msg 状态说明
+     * @param     $code 状态码
+     * @param int $count
+     * @return array
+     * @title  控制器成功返回(会结束当前业务)
+     */
+    function succeed($data,$msg='',$code='',$count=0)
+    {
+        return App()->Response()->succeed($data,$msg='',$code='',$count=0);
+    }
+}
+
+if (!function_exists('error')) {
+    /**
+     * @Author pizepei
+     * @Created 2019/2/15 23:09
+     * @param $msg  错误说明
+     * @param $code  错误代码
+     * @param $data 错误详细信息
+     * @return array
+     * @title  控制器错误返回
+     */
+    function error($msg='',$code='',$data)
+    {
+        return App()->Response()->error($msg='',$code='',$data);
+    }
+}
+
 
 if (!function_exists('Helper')) {
     /**
