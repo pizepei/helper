@@ -32,7 +32,7 @@ if (!function_exists('succeed')) {
      */
     function succeed($data,$msg='',$code='',$count=0)
     {
-        return App()->Response()->succeed($data,$msg='',$code='',$count=0);
+        return App()->Response()->succeed($data,$msg,$code,$count);
     }
 }
 
@@ -46,9 +46,9 @@ if (!function_exists('error')) {
      * @return array
      * @title  控制器错误返回
      */
-    function error($msg='',$code='',$data)
+    function error($msg='',$code='',$data=[])
     {
-        return App()->Response()->error($msg='',$code='',$data);
+        return App()->Response()->error($msg,$code,$data);
     }
 }
 
