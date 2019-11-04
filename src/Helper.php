@@ -217,6 +217,8 @@ class Helper extends Container
             $header = $parameter['header'];
             //定义header
         }
+        # 设置不返回HTTP/1.1 100 Continue
+        $header[] = 'Expect:';
         curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
 
         /**
@@ -232,6 +234,7 @@ class Helper extends Container
         $output = curl_exec($curl);
         $getinfo = curl_getinfo($curl); //获取请求信息
         $error = curl_error($curl);
+        $output = str_replace('HTTP/1.1 100 Continue'.PHP_EOL,'',$output);
         /**
          * 分类$output 获取获取头部信息和主体信息
          */
