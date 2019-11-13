@@ -402,6 +402,72 @@ class Helper extends Container
         return 'https://chart.googleapis.com/chart?chs='.$width.'x'.$height.'&chld='.$level.'|0&cht=qr&chl='.$urlencoded.'';
     }
 
-
+    /**
+     * 获取所有文件目录地址
+     * @param $dir
+     * @param $fileData
+     */
+    public function getFilePathData($dir,&$fileData,string $suffix='.php',string $approve='')
+    {
+        # 判断是否是目录
+        if (is_dir($dir)){
+            #  是否是vendor包模式
+            if ($approve !=='') {
+                $exist = false;
+                if ($dh = opendir($dir)){
+                    while (($file = readdir($dh)) !== false){
+                        if($file != '.' && $file != '..'){
+                            # 判断是否是目录
+                            if(is_dir($dir.DIRECTORY_SEPARATOR.$file)){
+                                $this->getFilePathData($dir.DIRECTORY_SEPARATOR.$file,$fileData,$suffix,$approve);
+                            }else{
+                                # 判断是否是php文件
+                                if($file== $approve){
+                                    $exist = true;
+                                }
+                            }
+                        }
+                    }
+                    closedir($dh);
+                }
+                # 有$exist
+                if ($exist){
+                    if ($dh = opendir($dir)){
+                        while (($file = readdir($dh)) !== false){
+                            if($file != '.' && $file != '..'){
+                                # 判断是否是目录
+                                if(is_dir($dir.DIRECTORY_SEPARATOR.$file)){
+                                    $this->getFilePathData($dir.DIRECTORY_SEPARATOR.$file,$fileData,$suffix,$approve);
+                                }else{
+                                    # 判断是否是php文件
+                                    if(strrchr($file,$suffix) == $suffix){
+                                        $fileData[] = str_replace('/src','',str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file));
+                                    }
+                                }
+                            }
+                        }
+                        closedir($dh);
+                    }
+                }
+            }else{
+                if ($dh = opendir($dir)){
+                    while (($file = readdir($dh)) !== false){
+                        if($file != '.' && $file != '..'){
+                            # 判断是否是目录
+                            if(is_dir($dir.DIRECTORY_SEPARATOR.$file)){
+                                $this->getFilePathData($dir.DIRECTORY_SEPARATOR.$file,$fileData,$suffix,$approve);
+                            }else{
+                                # 判断是否是php文件
+                                if(strrchr($file,$suffix) == $suffix){
+                                    $fileData[] = $dir.DIRECTORY_SEPARATOR.$file;
+                                }
+                            }
+                        }
+                    }
+                    closedir($dh);
+                }
+            }
+        }
+    }
 
 }
