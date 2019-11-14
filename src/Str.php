@@ -79,5 +79,20 @@ class Str
         }
     }
 
-
+    /**
+     * @Author 皮泽培
+     * @Created 2019/11/14 10:00
+     * @param array $data 需要替换的数据['key'=>'替换成的字符串']
+     * @param string $srt  被替换的字符串
+     * @param string $left  左边
+     * @param string $right  右边
+     * @title  批量替换字符串方法
+     * @throws \Exception
+     */
+    public function str_replace(array $data,string &$srt,$left='{{',$right='}}')
+    {
+        foreach ($data as $key=>$value){
+            $srt = str_replace($left.$key.$right,$value,$srt);
+        }
+    }
 }
