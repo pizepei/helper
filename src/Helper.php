@@ -423,6 +423,7 @@ class Helper extends Container
                             }else{
                                 # 判断是否是php文件
                                 if($file== $approve){
+                                    $approveInfo = file_get_contents($dir.DIRECTORY_SEPARATOR.$file);
                                     $exist = true;
                                 }
                             }
@@ -441,7 +442,7 @@ class Helper extends Container
                                 }else{
                                     # 判断是否是php文件
                                     if(strrchr($file,$suffix) == $suffix){
-                                        $fileData[] = str_replace('/src','',str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file));
+                                        $fileData[] = ['path'=>str_replace('/src','',str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file)),'packageInfo'=>$approveInfo];
                                     }
                                 }
                             }
