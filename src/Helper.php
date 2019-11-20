@@ -442,7 +442,11 @@ class Helper extends Container
                                 }else{
                                     # 判断是否是php文件
                                     if(strrchr($file,$suffix) == $suffix){
-                                        $fileData[] = ['path'=>str_replace('/src','',str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file)),'packageInfo'=>$approveInfo];
+                                        if (DIRECTORY_SEPARATOR ==='/'){
+                                            $fileData[] = ['path'=>str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file),'packageInfo'=>$approveInfo];
+                                        }else{
+                                            $fileData[] = ['path'=>str_replace('/src','',str_replace('..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR,'../',$dir.DIRECTORY_SEPARATOR.$file)),'packageInfo'=>$approveInfo];
+                                        }
                                     }
                                 }
                             }
