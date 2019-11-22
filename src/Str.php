@@ -48,13 +48,16 @@ class Str
      * @param $one 干扰
      * @throws \Exception
      */
-    public  function str_rand(int $length,string $one=''):string
+    public  function str_rand(int $length,string $one='',$strtoupper=false):string
     {
         $str = $this->random_pseudo_bytes(32,16,$one);
         $strlen = strlen($str)-1;
         $results = '';
         for($i=1;$i<=$length;$i++){
             $results  .= $str{mt_rand(0,$strlen)};
+        }
+        if ($strtoupper){
+            $results = strtoupper($results);
         }
         return $results;
     }
