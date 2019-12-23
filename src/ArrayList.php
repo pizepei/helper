@@ -46,4 +46,32 @@ class ArrayList
         }
         return $data;
     }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/12/23 11:53
+     * @param $arr1
+     * @param $arr2
+     * @title  深层合并数组
+     * @explain 深层合并数组
+     * @return array
+     * @throws \Exception
+     */
+    public function array_merge_deep($arr1, $arr2){
+        $merged	= $arr1;
+
+        foreach($arr2 as $key => &$value){
+            if(is_array($value) && isset($merged[$key]) && is_array($merged[$key])){
+                $merged[$key]	= $this->array_merge_deep($merged[$key], $value);
+            }elseif(is_numeric($key)){
+                if(!in_array($value, $merged)) {
+                    $merged[]	= $value;
+                }
+            }else{
+                $merged[$key]	= $value;
+            }
+        }
+
+        return $merged;
+    }
 }
