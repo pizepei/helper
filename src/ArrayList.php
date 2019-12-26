@@ -74,4 +74,70 @@ class ArrayList
 
         return $merged;
     }
+
+    /**
+     * @Author 皮泽培
+     * @Created 2019/12/26 14:54
+     * @title  深层数组排序
+     * @param $data 需要排序的array
+     * @param $condition ['key'=>'SORT_DESC',...]   SORT:SORT_DESC,SORT_ASC
+     * @return array
+     */
+    public function sortMultiArray(&$data, $condition):array
+    {
+        if (count($data) <= 0 || empty($condition)) {
+            return $data;
+        }
+        $dimension = count($condition);
+        $fileds = array_keys($condition);
+        $types = array_values($condition);
+        switch ($dimension) {
+            case 1:
+                $data = $this->sort1Dimension($data, $fileds[0], $types[0]);
+                break;
+            case 2:
+                $data = $this->sort2Dimension($data, $fileds[0], $types[0], $fileds[1], $types[1]);
+                break;
+            default:
+                $data = $this->sort3Dimension($data, $fileds[0], $types[0], $fileds[1], $types[1], $fileds[2], $types[2]);
+                break;
+        }
+        return $data;
+    }
+    public function sort1Dimension(&$data, $filed, $type)
+    {
+        if (count($data) <= 0) {
+            return $data;
+        }
+        foreach ($data as $key => $value) {
+            $temp[$key] = $value[$filed];
+        }
+        array_multisort($temp, $type, $data);
+        return $data;
+    }
+    public function sort2Dimension(&$data, $filed1, $type1, $filed2, $type2)
+    {
+        if (count($data) <= 0) {
+            return $data;
+        }
+        foreach ($data as $key => $value) {
+            $sort_filed1[$key] = $value[$filed1];
+            $sort_filed2[$key] = $value[$filed2];
+        }
+        array_multisort($sort_filed1, $type1, $sort_filed2, $type2, $data);
+        return $data;
+    }
+    public function sort3Dimension(&$data, $filed1, $type1, $filed2, $type2, $filed3, $type3)
+    {
+        if (count($data) <= 0) {
+            return $data;
+        }
+        foreach ($data as $key => $value) {
+            $sort_filed1[$key] = $value[$filed1];
+            $sort_filed2[$key] = $value[$filed2];
+            $sort_filed3[$key] = $value[$filed3];
+        }
+        array_multisort($sort_filed1, $type1, $sort_filed2, $type2, $sort_filed3, $type3, $data);
+        return $data;
+    }
 }
