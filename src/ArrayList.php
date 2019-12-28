@@ -159,4 +159,22 @@ class ArrayList
         array_multisort($sort_filed1, $type1, $sort_filed2, $type2, $sort_filed3, $type3, $data);
         return $data;
     }
+
+
+    /**
+     * 拼接array 合并第一层、不合并下级(追加)
+     * @param mixed ...$arrayData
+     * @return array
+     */
+    public function arrayAdditional(...$arrayData)
+    {
+        # 筛选主项目数据出来 在最后合并
+        $array =  array_merge(...$arrayData);
+        $data = [];
+        foreach ($array as $k=>$v)
+        {
+            array_push($data,...array_values($v));
+        }
+        return $data;
+    }
 }
