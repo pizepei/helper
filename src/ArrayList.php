@@ -53,11 +53,11 @@ class ArrayList
      * @param $arr1
      * @param $arr2
      * @title  深层合并数组
-     * @explain 深层合并数组
+     * @explain 深层合并数组(两个)
      * @return array
      * @throws \Exception
      */
-    public function array_merge_deep($arr1, $arr2){
+    public function array_merge_deep($arr1,$arr2){
         $merged	= $arr1;
 
         foreach($arr2 as $key => &$value){
@@ -75,6 +75,25 @@ class ArrayList
         return $merged;
     }
 
+    /**
+     * @Author 皮泽培
+     * @Created 2019/12/28 9:30
+     * @param mixed ...$arr1
+     * @return array [json] 定义输出返回数据
+     * @title  多数组批量合并
+     * @throws \Exception
+     */
+    public function array_merge_deep_more(...$arr)
+    {
+        if (count($arr) <=1){ throw new \Exception('至少两个array');}
+        $count = count($arr);
+        for ($i=1;$i<$count;$i++)
+        {
+            $merged = array_shift($arr);
+            $merged = $this->array_merge_deep($merged,$arr[0]);
+        }
+        return $merged;
+    }
     /**
      * @Author 皮泽培
      * @Created 2019/12/26 14:54
