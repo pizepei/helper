@@ -179,7 +179,7 @@ class Helper extends Container
      * @title http请求方法
      * @param $url 请求地址（get参数拼接上）
      * @param dtring $data 请求的主体数据
-     * @param array $parameter 参数 ssl[1、2]默认2验证https ssl       type [get、put、post、delete] 默认get，有$data自动设置为post        timeout  超时单位秒
+     * @param array $parameter 参数 ssl[0、2]默认2验证https ssl       type [get、put、post、delete] 默认get，有$data自动设置为post        timeout  超时单位秒
      * @return array info 请求信息  body 获取的请求body  error 错误数据   header  响应方的响应header
      */
     public function httpRequest(string $url,string $data='',array $parameter=[]):array
